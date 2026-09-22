@@ -31,7 +31,7 @@ jobs:
       - name: Run documentation agent
         env:
           LLM_PROVIDER: api
-          LLM_API_URL: https://api.baiduqianfan.ai/v2/tokenplan/team/chat/completions
+          LLM_API_URL: https://api.baiduqianfan.ai/v2/tokenplan/team
           LLM_API_KEY: ${{ secrets.FLUXA_API_KEY }}
           LLM_MODEL: deepseek-v4-flash
         run: |
