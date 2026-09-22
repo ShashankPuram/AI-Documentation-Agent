@@ -23,7 +23,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r backend/requirements.txt
 
-      - name: Verify backend
+      - name: Run documentation agent
         run: |
-          python -m py_compile backend/main.py
-          echo "AI Documentation Agent backend verified successfully"
+          python backend/agent.py .
+
+      - name: Verify workflow
+        run: |
+          echo "AI Documentation Agent completed"
