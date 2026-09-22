@@ -1,0 +1,48 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Backend virtual environment
+backend/venv/
+
+# Environment variables
+.env
+.env.*
+
+# Generated documentation artifacts
+**/docs/.documentation_state.json
+**/docs/api/*.md
+
+# Generated diagrams
+**/dependency_graph.dot
+**/dependency_graph.png
+**/architecture_graph.dot
+**/architecture_graph.png
+**/class_diagram.dot
+**/class_diagram.png
+
+# Test repositories
+repositories/hello-world/
+repositories/hello-world-2/
+repositories/ast-test-project/
+
+# Python cache
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Cloned/test repositories
+repositories/
