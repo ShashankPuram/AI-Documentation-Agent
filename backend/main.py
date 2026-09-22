@@ -15,7 +15,16 @@ from services.documentation_generator import (
 )
 
 from services.git_documentation_agent import (
-    synchronize_documentation
+    synchronize_documentation,
+    synchronize_current_documentation
+)
+
+from services.documentation_state import (
+    save_documentation_state
+)
+
+from services.git_state_analyzer import (
+    get_git_commit_state
 )
 
 
@@ -64,6 +73,11 @@ class DocumentationSyncRequest(BaseModel):
     repository_path: str
     old_commit: str
     new_commit: str
+
+
+class CurrentDocumentationSyncRequest(BaseModel):
+
+    repository_path: str
 
 
 # ============================================================
@@ -136,6 +150,26 @@ def generate_documentation_endpoint(
         request.repository_path
     )
 
+    if not result["success"]:
+        return result
+
+    git_state_result = get_git_commit_state(
+        request.repository_path
+    )
+
+    if not git_state_result["success"]:
+        return git_state_result
+
+    state_result = save_documentation_state(
+        request.repository_path,
+        git_state_result["latest_commit"]
+    )
+
+    if not state_result["success"]:
+        return state_result
+
+    result["documentation_state"] = state_result
+
     return result
 
 
@@ -163,6 +197,34 @@ def synchronize_documentation_endpoint(
         request.repository_path,
         request.old_commit,
         request.new_commit,
+        project_analysis
+    )
+
+    return result
+
+
+# ============================================================
+# Automatic Current Git Synchronization
+# ============================================================
+
+
+@app.post(
+    "/repositories/synchronize-current"
+)
+def synchronize_current_documentation_endpoint(
+    request: CurrentDocumentationSyncRequest
+):
+
+    project_analysis = analyze_project(
+        request.repository_path
+    )
+
+    if not project_analysis["success"]:
+
+        return project_analysis
+
+    result = synchronize_current_documentation(
+        request.repository_path,
         project_analysis
     )
 
