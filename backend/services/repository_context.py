@@ -1,6 +1,10 @@
 import json
 
 
+# Keep the global repository context small enough for cloud LLM APIs.
+MAX_CONTEXT_CHARS = 12000
+
+
 def build_repository_context(project_analysis):
     """
     Build a structured context representation of the repository.
@@ -240,7 +244,22 @@ def context_to_text(context):
 
         return ""
 
-    return json.dumps(
+    context_text = json.dumps(
         context["context"],
         indent=2
     )
+
+    # Prevent very large repository-wide context
+    # from exceeding cloud LLM request limits.
+    if len(context_text) > MAX_CONTEXT_CHARS:
+
+        context_text = (
+            context_text[
+                :MAX_CONTEXT_CHARS
+            ]
+            + "\n\n"
+            + "[Repository context truncated "
+            "to fit the LLM request limit.]"
+        )
+
+    return context_text
