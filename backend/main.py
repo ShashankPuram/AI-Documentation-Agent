@@ -1,9 +1,14 @@
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from services.repository_service import (
     clone_repository
+)
+
+from services.repository_manager import (
+    get_repository_status
 )
 
 from services.project_analyzer import (
@@ -37,6 +42,26 @@ app = FastAPI(
     version="1.0.0"
 )
 
+
+# ============================================================
+# CORS
+# ============================================================
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# ============================================================
+# Static Diagrams
+# ============================================================
 
 app.mount(
     "/diagrams",
@@ -80,6 +105,11 @@ class CurrentDocumentationSyncRequest(BaseModel):
     repository_path: str
 
 
+class RepositoryStatusRequest(BaseModel):
+
+    repository_path: str
+
+
 # ============================================================
 # Root
 # ============================================================
@@ -110,6 +140,25 @@ def clone_repository_endpoint(
     result = clone_repository(
         request.repository_url,
         request.repository_name
+    )
+
+    return result
+
+
+# ============================================================
+# Repository Status
+# ============================================================
+
+
+@app.post(
+    "/repositories/status"
+)
+def repository_status_endpoint(
+    request: RepositoryStatusRequest
+):
+
+    result = get_repository_status(
+        request.repository_path
     )
 
     return result
@@ -151,6 +200,7 @@ def generate_documentation_endpoint(
     )
 
     if not result["success"]:
+
         return result
 
     git_state_result = get_git_commit_state(
@@ -158,6 +208,7 @@ def generate_documentation_endpoint(
     )
 
     if not git_state_result["success"]:
+
         return git_state_result
 
     state_result = save_documentation_state(
@@ -166,9 +217,12 @@ def generate_documentation_endpoint(
     )
 
     if not state_result["success"]:
+
         return state_result
 
-    result["documentation_state"] = state_result
+    result["documentation_state"] = (
+        state_result
+    )
 
     return result
 
